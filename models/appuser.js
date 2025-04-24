@@ -25,23 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'AppUser',
-      hooks: {
-        // Before creating a new user, hash the password
-        beforeCreate: async (user) => {
-          if (user.password) {
-            const saltRounds = 10;
-            user.password = await bcrypt.hash(user.password, saltRounds);
-          }
-        },
-
-        // Before updating a user, hash the password if it has changed
-        beforeUpdate: async (user) => {
-          if (user.changed('password')) {
-            const saltRounds = 10;
-            user.password = await bcrypt.hash(user.password, saltRounds);
-          }
-        }
-      }
     }
   );
 
