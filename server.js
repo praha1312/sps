@@ -34,17 +34,26 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Helper functions for encryption and decryption
-function encrypt(text, key) {
-  const cipher = crypto.createCipher('aes-256-cbc', key);
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return encrypted;
+// Helper function to generate a random initialization vector (IV)
+function generateIV() {
+  return crypto.randomBytes(16); // 16 bytes for AES-256-CBC
 }
 
+// Encrypt a string using AES-256-CBC
+function encrypt(text, key) {
+  const iv = generateIV(); // Generate a random IV
+  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return iv.toString('hex') + encrypted; // Prepend IV to the encrypted text
+}
+
+// Decrypt a string using AES-256-CBC
 function decrypt(encryptedText, key) {
-  const decipher = crypto.createDecipher('aes-256-cbc', key);
-  let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+  const iv = Buffer.from(encryptedText.slice(0, 32), 'hex'); // Extract the first 32 characters (IV)
+  const encrypted = encryptedText.slice(32); // The rest is the encrypted text
+  const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
 }
