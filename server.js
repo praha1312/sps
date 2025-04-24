@@ -39,10 +39,18 @@ function generateIV() {
   return crypto.randomBytes(16); // 16 bytes for AES-256-CBC
 }
 
+// Helper function to normalize the key to 32 bytes
+function normalizeKey(key) {
+  const hash = crypto.createHash('sha256'); // Use SHA-256 to hash the key
+  hash.update(key);
+  return hash.digest(); // Returns a 32-byte buffer
+}
+
 // Encrypt a string using AES-256-CBC
 function encrypt(text, key) {
   const iv = generateIV(); // Generate a random IV
-  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+  const normalizedKey = normalizeKey(key); // Normalize the key to 32 bytes
+  const cipher = crypto.createCipheriv('aes-256-cbc', normalizedKey, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   return iv.toString('hex') + encrypted; // Prepend IV to the encrypted text
@@ -52,7 +60,8 @@ function encrypt(text, key) {
 function decrypt(encryptedText, key) {
   const iv = Buffer.from(encryptedText.slice(0, 32), 'hex'); // Extract the first 32 characters (IV)
   const encrypted = encryptedText.slice(32); // The rest is the encrypted text
-  const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+  const normalizedKey = normalizeKey(key); // Normalize the key to 32 bytes
+  const decipher = crypto.createDecipheriv('aes-256-cbc', normalizedKey, iv);
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
