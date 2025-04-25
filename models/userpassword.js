@@ -1,7 +1,8 @@
 'use strict';
-import { Sequelize, Model } from "sequelize";
-
-export default (sequelize, DataTypes) => {
+const {
+  Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
   class UserPassword extends Model {
     /**
      * Helper method for defining associations.
@@ -9,7 +10,7 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      UserPassword.belongsTo(models.User, {foreignKey: 'ownerUserId'})
+      // define association here
     }
   }
   UserPassword.init({
@@ -17,10 +18,7 @@ export default (sequelize, DataTypes) => {
     url: DataTypes.STRING,
     username: DataTypes.STRING,
     password: DataTypes.STRING,
-    sharedByUserId: DataTypes.INTEGER,
-    label: DataTypes.STRING,
-    weak_encryption: DataTypes.BOOLEAN,
-    source_password_id: DataTypes.INTEGER
+    sharedByUserId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'UserPassword',
